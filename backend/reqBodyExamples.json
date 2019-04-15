@@ -8,14 +8,14 @@
       "carpentry",
       "roof repair"
     ],
-    "password":"678567etrutuierztuz89758",
+    "password":"company1",
     "email": "company1@gmail.com",
-    "address": {"street":"SesamStr",
-      "number": 4,
+    "address": {
+      "street":"SesamStr. 4",
       "zip": "34543",
       "city": "Berlin"
     },
-    "avatar": "/uploads/image/company1.jpg",
+    "avatar": "/uploads/images/company1.jpg",
     "projectImages": [
         {"project1": "/uploads/image/company1-project1.jpg"},
         {"project2": "/uploads/image/company1-project2.jpg"},
@@ -31,19 +31,27 @@
 "last_name": "cicaloni",
 "email": "gaia@gmail.com",
 "password": "shjfsk89437897hsdjkhjksdh",
-"avatar": "/uploads/image/gaia.jpg",
+"avatar": "/uploads/images/gaia.jpg",
 "estimations": []
 }
 	
 ////////////estimation request
 
+
 { 
+  "user":"5c9b833f0756b91851b783a4",
+  
+"requestData": {
+  "title": "blabla",
+  "messageText": "Bla",
+  "budget": "Bla",
+  "date": "String/str/str"
+},
+"editedImages": [{"user-project0": "/uploads/estimations/image/user1-project1.jpg"},
+  {"user-project1": "/uploads/estimations/image/user1-project2.jpg"},
+  {"user-project2":"/uploads/estimations/image/user1-project3.jpg"}]
 
-"editedImages": [
-    {"user-project0": "/uploads/image/user1-project1.jpg"},
-    {"user-project1": "/uploads/image/user1-project2.jpg"},
-    {"user-project2":"/uploads/image/user1-project3.jpg"}
-
-]
 }
+
+
 	

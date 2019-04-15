@@ -1,69 +1,132 @@
-import _ from 'lodash';
-import React from 'react';
-import { Ionicons } from 'react-native-vector-icons';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import _ from "lodash";
+import React from "react";
+import { Ionicons } from "react-native-vector-icons";
+import {
+  createStackNavigator,
+  createBottomTabNavigator
+} from "react-navigation";
 
-import Welcome from '../components/Welcome/Welcome';
-import Home from '../components/Home/Home';
-import Login from '../components/Login/Login';
-import SignUp from '../components/SignUp/SignUp';
-import UsersignUp from '../components/SignUp/UsersignUp';
-import Profile from '../components/Profile/Profile';
-import RequestFormular from '../components/Profile/RequestFormular';
+import Welcome from "../components/Welcome/Welcome";
+import WelcomeAnimation from "../components/LoadingAni/LoadingAni";
+import Login from "../components/Login/Login";
+import SignUp from "../components/SignUp/SignUp";
+import UsersignUp from "../components/SignUp/UsersignUp";
+import UserProfile from "../components/Profile/UserProfile";
+import ProfileCompany from "../components/Profile/ProfileCompany";
+import Camera from "../components/AdvancedCamera/AdvancedCamera";
+import RequestFormular from "../components/Profile/RequestFormular";
+import SendEmail from "../components/SendEmail/SendEmail";
+import ImageEditor from "../components/AdvancedCamera/ImageEditor";
+import Register from "../components/Profile/Register";
+import EditUserProfile from "../components/Profile/EditUserProfile";
+import Geo from "../components/Geolocation/Geo";
 
-const ACTIVE_TAB_COLOR = '#69A6F7';
-const INACTIVE_TAB_COLOR = '#aaa';
+const ACTIVE_TAB_COLOR = "#69A6F7";
+const INACTIVE_TAB_COLOR = "#aaa";
 
 const Icon = ({ name, focused }) => (
-	<Ionicons name={name} size={30} color={focused ? ACTIVE_TAB_COLOR : INACTIVE_TAB_COLOR} />
+  <Ionicons
+    name={name}
+    size={30}
+    color={focused ? ACTIVE_TAB_COLOR : INACTIVE_TAB_COLOR}
+  />
 );
 
 const LoginStack = createStackNavigator({
-	Login      : {
-		screen : Login
-	},
-	Home       : {
-		screen : Home
-	},
-	SignUp     : {
-		screen : SignUp
-	},
-	UsersignUp : {
-		screen : UsersignUp
-	}
+  Login: {
+    screen: Login
+  },
+  Profile: {
+    screen: UserProfile
+  },
+  SignUp: {
+    screen: SignUp
+  },
+  UsersignUp: {
+    screen: UsersignUp
+  },
+  Register: {
+    screen: Register
+  },
+  EditUserProfile: {
+    screen: EditUserProfile
+  }
 });
 
 const WelcomeStack = createStackNavigator({
-	Welcome         : {
-		screen : Welcome
-	},
-	Profile         : {
-		screen : Profile
-	},
-	RequestFormular : {
-		screen : RequestFormular
-	}
+  Welcome: {
+    screen: Welcome
+  },
+  ProfileCompany: {
+    screen: ProfileCompany
+  },
+
+  RequestFormular: {
+    screen: RequestFormular
+  },
+  ImageEditor: {
+    screen: ImageEditor
+  },
+  Camera: {
+    screen: Camera
+  },
+  SendEmail: {
+    screen: SendEmail
+  },
+  welcomeAnimation: {
+    screen: WelcomeAnimation
+  },
+  Geolocalitation: {
+    screen: Geo
+  }
 });
 
-export default createBottomTabNavigator(
-	{
-		Welcome : WelcomeStack,
+WelcomeStack.navigationOptions = ({ navigation }) => {
+  let tabBarVisible = false;
+  if (navigation.state.index > 0) {
+    tabBarVisible = false;
+  }
 
-		Users   : LoginStack
-	},
-	{
-		initialRouteName  : 'Welcome',
-		navigationOptions : ({ navigation }) => ({
-			tabBarIcon : ({ focused, horizontal, tintColor }) => {
-				const { routeName } = navigation.state;
-				console.log(routeName);
-				if (routeName === 'Welcome') {
-					name = 'ios-home';
-				} else if (routeName === 'Users') {
-					name = 'ios-options';
-				}
-				return <Icon name={name} size={30} color={focused ? ACTIVE_TAB_COLOR : INACTIVE_TAB_COLOR} />;
-			}
-		})
-	}
+  return {
+    tabBarVisible
+  };
+};
+LoginStack.navigationOptions = ({ navigation }) => {
+  let tabBarVisible = false;
+  if (navigation.state.index > 0) {
+    tabBarVisible = false;
+  }
+
+  return {
+    tabBarVisible
+  };
+};
+
+export default createBottomTabNavigator(
+  {
+    Intro: WelcomeAnimation,
+    Home: WelcomeStack,
+    Users: LoginStack
+  },
+  {
+    initialRouteName: "Intro",
+    navigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, horizontal, tintColor }) => {
+        const { routeName } = navigation.state;
+
+        let iconName;
+        if (routeName === "Home") {
+          iconName = "ios-home";
+        } else if (routeName === "Users") {
+          iconName = "ios-options";
+        }
+
+        return (
+          routeName !== Animation && (
+            <Icon name={iconName} size={25} color={tintColor} />
+          )
+        );
+      }
+    })
+  }
 );

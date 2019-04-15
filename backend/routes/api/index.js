@@ -7,6 +7,8 @@ const userController = require("../../controllers/userController");
 const professionalController = require("../../controllers/professionalController");
 const estimationController = require("../../controllers/estimationController");
 
+const { loginValidation } = require("../../authServices/index");
+
 const uuidV4 = require("uuid/v4");
 const cors = require("cors");
 
@@ -32,8 +34,8 @@ router.get("/", cors(), (req, res) => {
 
 router.get("/api", cors(), (req, res) => {
   res.send({
-    api: "edomus App - decoration app",
-    authors: "Ansumana, Gaia and Sergio"
+    api: "Buildy App - decoration app",
+    authors: "Ansumana Baboe, Gaia Cicaloni and Sergio Usle"
   });
 });
 
@@ -61,7 +63,7 @@ router.post(
 );
 
 router.post(
-  "/api/user/estimation/send",
+  "/api/user/request/save",
   imageUpload.array("editedImages", 8),
   estimationController.saveNewEstimation
 );
@@ -71,11 +73,13 @@ router.post(
 router.get("/api/user/listAll", userController.listAll);
 router.get("/api/professional/listAll", professionalController.listAll);
 
-//validate users login
-router.post("/api/user/login", userController.validateUser);
-router.post(
-  "/api/professional/login",
-  professionalController.validateProfessional
-);
+router.get("/api/user/request/showLast", estimationController.showLast);
+
+//upload an avatar image
+router.get("/api/professional/save_avatar", professionalController.saveAvatar);
+router.post("/api/user/save_avatar", userController.saveAvatar);
+
+//validate users || professionals login (we have to use one login for both)
+router.post("/api/login", loginValidation);
 
 module.exports = router;
