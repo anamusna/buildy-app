@@ -13,12 +13,21 @@ const uuidV4 = require("uuid/v4");
 const cors = require("cors");
 
 const storage = multer.diskStorage({
-  destination: "./uploads/images/",
+  destination: (req, file, callback) => {
+    console.log("file", file);
+    if (file.fieldname === "avatar") {
+      let path = "./uploads/images/";
+
+      callback(null, path);
+    } else {
+      let path = "./uploads/company_projects/";
+
+      callback(null, path);
+    }
+  },
+
   filename: function(req, file, callback) {
-    crypto.pseudoRandomBytes(16, function(err, raw) {
-      if (err) return callback(err);
-      callback(null, raw.toString("hex") + path.extname(file.originalname));
-    });
+    callback(null, file.originalname + "_" + uuidV4());
   }
 });
 
@@ -68,15 +77,25 @@ router.post(
   estimationController.saveNewEstimation
 );
 
+router.post(
+  "/api/user/update",
+  imageUpload.single("avatar"),
+  userController.updateUser
+);
+
 //get all
 
 router.get("/api/user/listAll", userController.listAll);
-router.get("/api/professional/listAll", professionalController.listAll);
+router.get("/api/user/showDetails", userController.showDetails);
 
+router.get("/api/professional/listAll", professionalController.listAll);
+router.get("/api/professional/showDetails", professionalController.showDetails);
+
+router.get("/api/user/request/getAll", estimationController.getAllEstimations);
 router.get("/api/user/request/showLast", estimationController.showLast);
 
 //upload an avatar image
-router.get("/api/professional/save_avatar", professionalController.saveAvatar);
+
 router.post("/api/user/save_avatar", userController.saveAvatar);
 
 //validate users || professionals login (we have to use one login for both)

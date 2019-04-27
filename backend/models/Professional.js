@@ -7,8 +7,7 @@ const professionalSchema = new mongoose.Schema({
   },
   services: [
     {
-      type: String,
-      required: true
+      type: String
     }
   ],
   password: {
@@ -20,23 +19,33 @@ const professionalSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  address: {
-    street: {
-      type: String,
-      required: true
-    },
-    zip: {
-      type: String,
-      required: true
-    },
-    city: {
-      type: String
+  shortDescription: {
+    type: String
+  },
+  longDescription: {
+    type: String
+  },
+
+  street: {
+    type: String,
+    required: true
+  },
+  zip: {
+    type: String,
+    required: true
+  },
+  city: {
+    type: String
+  },
+  location: {
+    type: { type: String },
+    coordinates: {
+      type: [Number],
+      index: "2dsphere"
     }
   },
-  avatar: {
-    type: String,
-    unique: true
-  },
+
+  avatar: {},
   projectImages: [{}],
 
   date: {
@@ -44,6 +53,8 @@ const professionalSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+professionalSchema.index({ location: "2dsphere" });
 
 module.exports = Professional = mongoose.model(
   "Professional",

@@ -95,29 +95,34 @@ export default class UploadAvatar extends React.Component {
   };
 
   async uploadImageAsync(uri) {
-    console.log(this.state.endpoint);
-
+    const endpoint = this.props.endpoint;
+    const payloadKey = this.props.payloadKey;
     const uriParts = uri.split(".");
     const fileType = uriParts[uriParts.length - 1];
-    const { headers } = this.props;
-    const endpoint = this.state.endpoint;
-    const payloadKey = this.state.payloadKey;
-    const method = "POST";
+
     const formData = new FormData();
     formData.append(payloadKey, {
       uri,
       name: uid(),
       type: `image/${fileType}`
     });
-    const options = {
-      method,
-      body: formData,
+
+    this.props.getUri(uri);
+    console.log("endpoint",endpoint)
+
+    return await fetch(endpoint, {
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "multipart/form-data"
-      }
-    };
-    return fetch(endpoint, options);
+      },
+      body: formData
+    })
+      .then(response => {
+        response.json().then(data => console.log(data));
+      })
+      .catch(err => console.log(err))
+      .done();
   }
 
   render() {
@@ -176,8 +181,14 @@ const style = StyleSheet.create({
     paddingLeft: 95,
     paddingRight: 95
   },
+
   circleWrapper: {
     borderRadius: 50,
-    marginTop: -10
+    marginTop: -10,
+    shadowColor: "#85c4ea",
+    shadowOffset: { width: 20, height: 20 },
+    shadowOpacity: 0.6,
+    shadowRadius: 40,
+    elevation: 6
   }
 });

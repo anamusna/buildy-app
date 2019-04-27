@@ -7,9 +7,8 @@ import {
 } from "react-navigation";
 
 import Welcome from "../components/Welcome/Welcome";
-import WelcomeAnimation from "../components/LoadingAni/LoadingAni";
 import Login from "../components/Login/Login";
-import SignUp from "../components/SignUp/SignUp";
+import ProfessionalSignUp from "../components/SignUp/ProfessionalSignUp";
 import UsersignUp from "../components/SignUp/UsersignUp";
 import UserProfile from "../components/Profile/UserProfile";
 import ProfileCompany from "../components/Profile/ProfileCompany";
@@ -19,7 +18,12 @@ import SendEmail from "../components/SendEmail/SendEmail";
 import ImageEditor from "../components/AdvancedCamera/ImageEditor";
 import Register from "../components/Profile/Register";
 import EditUserProfile from "../components/Profile/EditUserProfile";
-import Geo from "../components/Geolocation/Geo";
+import GalleryScreen from "../components/AdvancedCamera/GalleryScreen";
+import WelcomeAnimation from "../components/Animations/LoadingAni";
+import LogOutAnimation from "../components/Animations/LogOutAnimation";
+import LoginAnimation from "../components/Animations/LoginAnimation";
+import SignupAnimation from "../components/Animations/SignupAnimation";
+import SelectCompanies from "../components/SendEmail/SelectCompanies";
 
 const ACTIVE_TAB_COLOR = "#69A6F7";
 const INACTIVE_TAB_COLOR = "#aaa";
@@ -32,35 +36,14 @@ const Icon = ({ name, focused }) => (
   />
 );
 
-const LoginStack = createStackNavigator({
-  Login: {
-    screen: Login
-  },
-  Profile: {
-    screen: UserProfile
-  },
-  SignUp: {
-    screen: SignUp
-  },
-  UsersignUp: {
-    screen: UsersignUp
-  },
-  Register: {
-    screen: Register
-  },
-  EditUserProfile: {
-    screen: EditUserProfile
-  }
-});
-
 const WelcomeStack = createStackNavigator({
   Welcome: {
     screen: Welcome
   },
+
   ProfileCompany: {
     screen: ProfileCompany
   },
-
   RequestFormular: {
     screen: RequestFormular
   },
@@ -76,8 +59,41 @@ const WelcomeStack = createStackNavigator({
   welcomeAnimation: {
     screen: WelcomeAnimation
   },
-  Geolocalitation: {
-    screen: Geo
+  LogOutAnimation: {
+    screen: LogOutAnimation
+  },
+  LoginAnimation: {
+    screen: LoginAnimation
+  },
+  SignupAnimation: {
+    screen: SignupAnimation
+  },
+  GalleryScreen: {
+    screen: GalleryScreen
+  },
+  Login: {
+    screen: Login
+  },
+  Profile: {
+    screen: UserProfile
+  },
+  ProfessionalSignUp: {
+    screen: ProfessionalSignUp
+  },
+  UsersignUp: {
+    screen: UsersignUp
+  },
+  Register: {
+    screen: Register
+  },
+  EditUserProfile: {
+    screen: EditUserProfile
+  },
+  UserProfile: {
+    screen: UserProfile
+  },
+  SelectCompanies: {
+    screen: SelectCompanies
   }
 });
 
@@ -91,22 +107,11 @@ WelcomeStack.navigationOptions = ({ navigation }) => {
     tabBarVisible
   };
 };
-LoginStack.navigationOptions = ({ navigation }) => {
-  let tabBarVisible = false;
-  if (navigation.state.index > 0) {
-    tabBarVisible = false;
-  }
-
-  return {
-    tabBarVisible
-  };
-};
 
 export default createBottomTabNavigator(
   {
     Intro: WelcomeAnimation,
-    Home: WelcomeStack,
-    Users: LoginStack
+    Home: WelcomeStack
   },
   {
     initialRouteName: "Intro",

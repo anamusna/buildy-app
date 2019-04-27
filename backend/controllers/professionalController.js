@@ -35,50 +35,82 @@ professionalController.listAll = (req, res) => {
   });
 };
 
-professionalController.saveNewProfessional = (req, res) => {
-  console.log(req.body);
+professionalController.searchNearest = (req, res) => {
+  Professional.find({
+    location:
+    {
+      $near:
+      {
+        $geometry: { type: "Point", coordinates: [52.520008, 13.404954] },
 
-  if (req.body.email !== "" || req.body.email !== undefined) {
-    Professional.find(
-      { email: req.body.email },
-      (err, registeredProfessionals) => {
-        if (err) {
-          return res.send("Registration failed. Server error");
-        } else if (registeredProfessionals.length > 0) {
-          return res.send({
-            isRegistered: true,
-            msg: "already registered"
-          });
-        } else {
-          bcrypt
-            .genSalt(saltRounds)
-            .then(salt => {
-              console.log(`Salt: ${salt}`);
-              return bcrypt.hash(req.body.password, salt);
-            })
-            .then(hash => {
-              console.log(`Hash: ${hash}`);
-              req.body.password = hash;
-              const professional = new Professional(req.body);
-
-              professional.save(error => {
-                if (error) {
-                  console.log(error);
-                  res.send(error);
-                } else {
-                  console.log("Professional was saved successfully");
-                  return res.send({
-                    success: true,
-                    msg: "Professional registration successful :)!",
-                    token: createToken(professional)
-                  });
-                }
-              });
-            })
-            .catch(err => console.error(err.message));
-        }
+        $maxDistance: req.query.distance
       }
-    );
+    }
+  }, (err, professionalList) => {
+    res.send(professionalList);
+  });
+}
+
+
+professionalController.showDetails = (req, res) => {
+  console.log(req.query.id);
+  Professional.find({ _id: req.query.id }, (err, professional) => {
+    if (err) {
+      throw err;
+    } else {
+      res.send(professional);
+    }
+  });
+};
+
+professionalController.saveNewProfessional = (req, res) => {
+  console.log("req body from company registration", "body_____>:",req.body,"files________>:" ,req.files);
+
+  const body = JSON.parse(req.body.professional);
+  console.log(body.email, body.password);
+  if (body.email !== "" || body.email !== undefined) {
+    Professional.find({ email: body.email }, (err, registeredProfessionals) => {
+      if (err) {
+        return res.send("Registration failed. Server error");
+      } else if (registeredProfessionals.length > 0) {
+        return res.send({
+          isRegistered: true,
+          msg: "already registered"
+        });
+      } else {
+        bcrypt
+          .genSalt(saltRounds)
+          .then(salt => {
+            console.log(`Salt: ${salt}`);
+            return bcrypt.hash(body.password, salt);
+          })
+          .then(hash => {
+            console.log(`Hash: ${hash}`);
+            body.password = hash;
+            body.avatar = req.files.avatar;
+            body.projectImages = req.files.projectImages;
+
+            const professional = new Professional(body);
+            professional._id = new mongoose.Types.ObjectId();
+            let token = createToken(professional);
+
+            professional.save(error => {
+              if (error) {
+                console.log(error);
+                res.send(error);
+              } else {
+                console.log("Professional was saved successfully");
+                return res.send({
+                  success: true,
+                  msg: "Professional registration successful :)!",
+                  token: token
+                });
+              }
+            });
+          })
+          .catch(err => console.error(err.message));
+      }
+    });
   } else {
     res.send(
       "Registration failed. Make sure You fulfilled correctly all fields"
@@ -86,11 +118,9 @@ professionalController.saveNewProfessional = (req, res) => {
   }
 };
 
-
-professionalController.saveAvatar = (req, res) => {
-  console.log(req.body);
+professionalController.saveImages = (req, res) => {
+  console.log("professionalController.saveImages", req.body, req.body._parts);
   res.send("testing upload avatar");
 };
-
 
 module.exports = professionalController;

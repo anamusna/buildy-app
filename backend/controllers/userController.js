@@ -13,6 +13,7 @@ const config = require("../config");
 // we create a token with JWT
 
 function createToken(user) {
+  console.log("user._id  create token", user._id);
   if (!user && !user._id) {
     return null;
   }
@@ -35,10 +36,24 @@ userController.listAll = (req, res) => {
   });
 };
 
-userController.saveNewUser = (req, res) => {
-  console.log(req.body);
+userController.showDetails = (req, res) => {
+  console.log("###", req.query.id);
+  User.find({ _id: req.query.id }, (err, user) => {
+    if (err) {
+      throw err;
+    } else {
+      res.send(user);
+    }
+  });
+};
 
-  if (req.body.email !== "" || req.body.email !== undefined) {
+userController.saveNewUser = (req, res) => {
+  console.log(req.body, req.file);
+
+  if (
+    req.body.email !== "" ||
+    req.body.email !== undefined
+  ) {
     User.find({ email: req.body.email }, (err, registeredUsers) => {
       if (err) {
         return res.send("Registration failed. Server error");
@@ -59,6 +74,7 @@ userController.saveNewUser = (req, res) => {
             req.body.password = hash;
             const user = new User(req.body);
             user._id = new mongoose.Types.ObjectId();
+            let token = createToken(user);
 
             user.save(error => {
               if (error) {
@@ -66,48 +82,27 @@ userController.saveNewUser = (req, res) => {
                   .status(500)
                   .send({ message: `Error creating user: ${error}` });
               } else {
-                const estimation = new Estimation({
-                  user: user._id,
-                  requestData: {},
-                  editedImages: [{}]
-                });
-                estimation.save(function(err) {
-                  if (err) return handleError(err);
+          
+                const sessionObj = {
+                  token: token,
+                  userId: user._id
+                };
+
+                const session = new Session(sessionObj);
+                session.save(error => {
+                  if (error) {
+                    console.log(error);
+                    res.send(error);
+                  } else {
+                    console.log("token saved");
+                    return null;
+                  }
                 });
                 console.log("User was created successfully");
                 return res.status(200).send({
                   success: true,
                   msg: "User registration was successful :)!",
-                  token: createToken(user)
-                });
-              }
-            });
-
-            const sessionObj = {
-              /**
-               * here you can pass the
-               * token also
-               *
-               *    token: req.body.params.token,
-               */
-
-              token: req.body.params.token || registeredUsers[0]._id,
-
-              userId: registeredUsers[0]._id
-            };
-
-            const session = new Session(sessionObj);
-            session.save(error => {
-              if (error) {
-                console.log(error);
-                res.send(error);
-              } else {
-                console.log("token saved");
-                return res.send({
-                  success: true,
-                  isLogged: true,
-                  // msg1: "Token created and saved :)!",
-                  msg2: "you are successfully logged"
+                  token: token
                 });
               }
             });
@@ -122,9 +117,19 @@ userController.saveNewUser = (req, res) => {
   }
 };
 
+userController.updateUser = (req, res) => {
+  console.log("req.query, req.body", req.query, req.body);
+
+  User.update({ _id: req.query.id }, { $set: req.body });
+  res.send({
+    msg: "updated"
+  });
+};
 userController.saveAvatar = (req, res) => {
-  console.log(req.body);
-  res.send("testing upload avatar");
+  console.log("userController.saveAvatar", req.body, req.body._parts);
+  return res.send({
+    status: true
+  });
 };
 
 module.exports = userController;

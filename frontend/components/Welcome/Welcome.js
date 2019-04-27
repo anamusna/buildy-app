@@ -7,14 +7,24 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  YellowBox
+  YellowBox,
+  AsyncStorage,
+  ScrollView,
+  RefreshControl
 } from "react-native";
+import { FileSystem } from "expo";
+
+import { Card, CardItem, Body, Header } from "native-base";
+
+import Geo from "../Geo/Geo";
+
 import { connect } from "react-redux";
-import { Card, ListItem, Button, Icon } from "react-native-elements";
+
 import { getPosts } from "../../actions";
-import Home from "../Home/Home";
+
 import { api } from "../../api/api";
 import { AntDesign } from "@expo/vector-icons";
+import { LOGOUT } from "../../actions/types";
 
 YellowBox.ignoreWarnings(["Require cycle:"]);
 
@@ -52,11 +62,14 @@ class Welcome extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      userLoggedIn: false
+      token: "",
+      loading: true,
+      userLoggedIn: false,
+      refreshing: false
     };
   }
 
-  changeHeader = isLogged => {
+  changeHeader = (isLogged, avatar, param) => {
     if (!isLogged) {
       this.props.navigation.setParams({
         HeaderTitle: (
@@ -122,18 +135,43 @@ class Welcome extends Component {
 
             <TouchableOpacity
               style={{
+                padding: 3,
+                borderRadius: 50,
+                borderWidth: 4,
+                borderColor: "#85c4ea",
+                marginLeft: 85,
+                alignSelf: "center"
+              }}
+              onPress={() =>
+                this.props.navigation.navigate("UserProfile", {
+                  changeScreen: param
+                })
+              }
+            >
+              <Image
+                style={{
+                  borderRadius: 50,
+                  alignSelf: "center",
+                  width: 40,
+                  height: 40
+                }}
+                source={{ uri: avatar }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                marginLeft: 90,
                 margin: 4,
                 padding: 5,
                 borderRadius: 6,
                 borderWidth: 2,
                 borderColor: "#85c4ea",
                 maxHeight: 60,
-                alignSelf: "center",
-                marginLeft: 238
+                alignSelf: "center"
               }}
-              onPress={() => this.props.navigation.navigate("UserProfile")}
+              onPress={() => this.logout()}
             >
-              <Text style={{ color: "#85c4ea" }}>AVATAR</Text>
+              <AntDesign name="logout" size={25} style={{ color: "#85c4ea" }} />
             </TouchableOpacity>
           </View>
         ),
@@ -143,17 +181,68 @@ class Welcome extends Component {
     }
   };
 
-  componentDidMount() {
+  componentDidMount = async () => {
     this.props.dispatchGetPosts();
+    this.props.navigation.setParams({ changeScreen: 0 });
+    try {
+      let tokenStorage = await AsyncStorage.getItem("id_token");
+      let avatar = await AsyncStorage.getItem("avatar");
 
-    // this.setState(
-    //   {
-    //     userLoggedIn: true
-    //   }
-    // );
+      if (tokenStorage !== null) {
+        this.setState(
+          {
+            token: tokenStorage,
+            userLoggedIn: true,
+            loading: false
+          },
 
-    this.changeHeader(this.state.userLoggedIn);
-  }
+          this.changeHeader(true, avatar)
+        );
+      } else {
+        this.changeHeader(false, null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  componentWillReceiveProps = async nextProps => {
+    let param_1 = this.props.navigation.getParam("changeScreen");
+    let param_2 = nextProps.navigation.getParam("changeScreen");
+    console.log(param_1, param_2);
+
+    if (param_1 !== param_2) {
+      let tokenStorage = await AsyncStorage.getItem("id_token");
+      if (tokenStorage !== null) {
+        let avatar = await AsyncStorage.getItem("avatar");
+
+        if (avatar.includes("/uploads/")) {
+          let avatarPath = api + avatar;
+          this.props.dispatchGetPosts();
+          this.changeHeader(true, avatarPath, param_2);
+
+          return;
+        }
+
+        console.log("avatar NOT includes upload", avatar);
+        await this.changeHeader(true, avatar, param_2);
+        console.log(param_1, param_2);
+      }
+    }
+  };
+
+  logout = async () => {
+    try {
+      await AsyncStorage.removeItem("id_token");
+      await AsyncStorage.removeItem("avatar");
+      console.log("token removed");
+      this.props.navigation.navigate("LogOutAnimation");
+      this.props.navigation.setParams({ changeScreen: 0 });
+      this.changeHeader(false, null);
+    } catch (err) {
+      console.log(`The error is: ${err}`);
+    }
+  };
 
   keyExtractor = (item, index) => String(item._id);
   renderItem = ({ item }) => {
@@ -163,44 +252,62 @@ class Welcome extends Component {
           this.props.navigation.navigate("ProfileCompany", { id: item._id })
         }
       >
-        <Card title={item.name}>
-          <Image
-            style={{ width: 300, height: 300 }}
-            source={{ uri: api + item.avatar }}
-          />
-          <View>
-            <Text>{item.email}</Text>
+        <Card style={{ marginTop: 10 }}>
+          <CardItem cardBody>
+            {typeof item.avatar == "string" ? (
+              <View>
+                <Image
+                  style={{ width: 350, height: 300 }}
+                  source={{ uri: api + item.avatar }}
+                />
+              </View>
+            ) : (
+              <View>
+                <Image
+                  style={{ width: 350, height: 300 }}
+                  source={{ uri: api + "/" + item.avatar[0].path }}
+                />
+              </View>
+            )}
+          </CardItem>
+          <CardItem>
+            <Body style={{ justifyContent: "center", alignItems: "center" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+                {item.name}
+              </Text>
 
-            <Button
-              buttonStyle={{
-                borderRadius: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                marginBottom: 0,
-                backgroundColor: "#85c4ea"
-              }}
-              title="READ MORE"
-              onPress={() =>
-                this.props.navigation.navigate("ProfileCompany", {
-                  id: item._id
-                })
-              }
-            />
-          </View>
+              <View style={{ flexDirection: "row" }}>
+                {item.services.map((service, i) => (
+                  <View key={i} style={{ paddingRight: 2, marginRight: 2 }}>
+                    <Text style={styles.servicesList}>{service}</Text>
+                  </View>
+                ))}
+              </View>
+            </Body>
+          </CardItem>
         </Card>
       </TouchableWithoutFeedback>
     );
   };
   render() {
     return (
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.componentDidMount}
+            progressViewOffset={120}
+          />
+        }
+      >
         <FlatList
           contentContainerStyle={{ flexGrow: 1 }}
           data={this.props.posts}
           keyExtractor={this.keyExtractor}
           renderItem={this.renderItem}
         />
-      </View>
+      </ScrollView>
     );
   }
 }
@@ -224,6 +331,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2
+  },
+  servicesList: {
+    textAlign: "left",
+    color: "#0ec485"
   }
 });
 
