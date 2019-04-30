@@ -1,9 +1,12 @@
-# buildy-frontend
+# BUILDY-frontend
 
 ### Buildy App for Android - an inner-reform and interior design App
 #### Final Proyect at DCI School Berlin
 
 team: Ansumana Darboe, Gaia Cicaloni and Sergio Usle
+
+![BUILDY_presentation_min_new](https://user-images.githubusercontent.com/39328915/56850201-817e5480-68ff-11e9-8a91-2f90373db70a.gif)
+
 
 
 ## To run this project:
