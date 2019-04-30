@@ -165,16 +165,20 @@ export default class UserProfile extends React.Component {
 
         <View style={styles.buttons}>
           <View style={styles.buttonEdit}>
-            <TouchableOpacity
-              onPress={() =>
-                this.props.navigation.navigate("EditUserProfile")
-              }
-            >
-              <MaterialIcons
-                name="mode-edit"
-                size={30}
-                color="white"
-              />
+           <TouchableOpacity
+                        onPress={() =>
+                          this.props.navigation.navigate("EditUserProfile", {
+                            changeScreen: this.props.navigation.getParam(
+                              "changeScreen"
+                            )
+                          })
+                        }
+                      >
+                        <MaterialIcons
+                          name="mode-edit"
+                          size={30}
+                          color="white"
+                       />
             </TouchableOpacity>
           </View>
         </View>
